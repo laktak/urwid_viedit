@@ -1,0 +1,4 @@
+README.rst
+dist/
+.cache/
+*.egg-info/
