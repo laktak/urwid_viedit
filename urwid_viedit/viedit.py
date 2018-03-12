@@ -86,8 +86,8 @@ class ViEdit(urwid.Edit):
             self.undo = self.undo[:self.undo_lvl] + [text]
 
         def get_b(pos):
-            while text[pos - 1] in WS and pos > 0: pos -= 1
-            while not text[pos - 1] in WS and pos > 0: pos -= 1
+            while pos > 0 and text[pos - 1] in WS: pos -= 1
+            while pos > 0 and not text[pos - 1] in WS: pos -= 1
             return pos
 
         def get_w(pos):
@@ -96,8 +96,8 @@ class ViEdit(urwid.Edit):
             return pos
 
         def get_e(pos):
-            while text[pos + 1] in WS and pos + 1 < last: pos += 1
-            while not text[pos + 1] in WS and pos + 1 < last: pos += 1
+            while pos < last and text[pos + 1] in WS: pos += 1
+            while pos < last and not text[pos + 1] in WS: pos += 1
             return pos
 
         if self.op in ['c', 'd', 'y']:
@@ -121,6 +121,11 @@ class ViEdit(urwid.Edit):
                 if self.op in ['c', 'd']: self.set_edit_text(stext[1])
 
             if self.op == 'c': self.normal = False
+            self.op = None
+            return
+        elif self.op == 'r':
+            text = text[:pos] + key + text[pos+1:]
+            self.set_edit_text(text)
             self.op = None
             return
 
@@ -175,7 +180,7 @@ class ViEdit(urwid.Edit):
                 self.set_edit_text(tx)
         # TODO
         # elif key == '.':
-        elif key in ['c', 'd', 'y']:
+        elif key in ['c', 'd', 'y', 'r']:
             self.op = key
             return
         elif key in [str(c) for c in range(1, 10)]:
