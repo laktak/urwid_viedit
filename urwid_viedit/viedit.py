@@ -9,8 +9,11 @@ class ViEdit(urwid.Edit):
 
     yank_text = ""
 
-    def __init__(self, *, completion_cb=None, normal_mode=True, **kwargs):
+    def __init__(self, *, completion_cb=None, mode_cb=None, normal_mode=True, **kwargs):
         """
+        :param mode_cb:
+            method that will be called when the mode changes with one argument:
+            - normal_mode (boolean)
         :param normal_mode: start in normal mode
         :param completion_cb:
             method that will be called for tab completion with 2 arguments:
@@ -28,9 +31,11 @@ class ViEdit(urwid.Edit):
         self.m = 1
         self.undo = [self.edit_text]
         self.undo_lvl = 0
+        self.mode_cb = mode_cb
         self.completion_cb = completion_cb
         self.completion_data = {}
         if self.normal: self.normal_key('$')
+        self.set_normal(self.normal)  # initial callback
 
     def insert_yank(self, pos):
         text = ViEdit.yank_text
@@ -66,10 +71,16 @@ class ViEdit(urwid.Edit):
             pass  # ignore
 
     def call_vi(self, key, op=None):
+        trigger = self.normal
         self.normal = True
         self.op = op
         self.normal_key(key)
-        self.normal = False
+        if trigger: self.set_normal(False)
+        else: self.normal = False
+
+    def set_normal(self, value=True):
+        self.normal = value
+        if self.mode_cb is not None: self.mode_cb(value)
 
     def normal_key(self, key):
         pos = self.edit_pos
@@ -120,7 +131,7 @@ class ViEdit(urwid.Edit):
                 ViEdit.yank_text = stext[0]
                 if self.op in ['c', 'd']: self.set_edit_text(stext[1])
 
-            if self.op == 'c': self.normal = False
+            if self.op == 'c': self.set_normal(False)
             self.op = None
             return
         elif self.op == 'r':
@@ -130,12 +141,12 @@ class ViEdit(urwid.Edit):
             return
 
         if key == 'i':
-            self.normal = False
+            self.set_normal(False)
         elif key == 'I':
             self.call_vi('0')
         elif key == 'a':
             self.set_edit_pos(pos + 1)
-            self.normal = False
+            self.set_normal(False)
         elif key == 'A':
             self.call_vi('$')
             self.call_vi('a')
@@ -192,7 +203,7 @@ class ViEdit(urwid.Edit):
     def insert_key(self, key):
         if key == "esc":
             self.set_edit_pos(self.edit_pos - 1)
-            self.normal = True
+            self.set_normal()
             self.op = None
 
         # emacs like
