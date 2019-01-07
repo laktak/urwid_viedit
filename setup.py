@@ -1,9 +1,12 @@
 from setuptools import setup
 import os
 
-with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'urwid_viedit', '__init__.py')) as fd:
-    version = [line.split()[-1].strip("\"") for line in fd if line.startswith('version')]
-if not version: raise Exception("Missing version!")
+with open(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "urwid_viedit", "__init__.py")
+) as fd:
+    version = [line.split()[-1].strip('"') for line in fd if line.startswith("version")]
+if not version:
+    raise Exception("Missing version!")
 
 setup(
     name="urwid_viedit",
