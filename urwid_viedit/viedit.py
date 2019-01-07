@@ -178,10 +178,11 @@ class ViEdit(urwid.Edit):
         elif key == "$":
             self.set_edit_pos(last)
         elif key == "x":
-            if pos == last:
-                pos -= 1
             for i in range(self.m):
                 text = ViEdit.get_text_sel(text, pos, pos + 1)[1]
+                if pos == last:
+                    pos -= 1
+                    last -= 1
             self.set_edit_text(text)
             self.set_edit_pos(pos)
         elif key == "P":
